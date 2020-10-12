@@ -15,7 +15,10 @@ if (!process.env.NASA_API_KEY) {
 
 const validateBodyContents = body => {
   if (!body || !Object.keys(body).length) {
-    throw new Error('Missing required parameters');
+    throw {
+      status: 400,
+      message: 'Missing required parameters'
+    };
   }
 
   if (
@@ -25,13 +28,17 @@ const validateBodyContents = body => {
     !body.within.value ||
     !body.within.units
   ) {
-    throw new Error('One or more parameters are missing');
+    throw {
+      status: 400,
+      message: 'One or more parameters are missing'
+    };
   }
 
   if (body.within.units !== 'kilometers' && body.within.units !== 'miles') {
-    throw new Error(
-      'Invalid unit provided, must be either kilometers or miles'
-    );
+    throw {
+      status: 400,
+      message: 'Invalid unit provided, must be either kilometers or miles'
+    };
   }
 };
 
@@ -71,7 +78,7 @@ app.post('/api/v1/asteroids', async (req, res) => {
     res.send({ asteroids });
   } catch (err) {
     console.log(err);
-    res.send({
+    res.status(err.status ? err.status : 500).send({
       error: true,
       message: err.message ? err.message : 'Unknown'
     });
