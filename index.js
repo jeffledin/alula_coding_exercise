@@ -1,12 +1,11 @@
-const axios = require('axios');
 const express = require('express');
+
+const { NasaClient } = require('./NasaClient');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
-
-const BASE_NASA_NEO_API_URL = 'https://api.nasa.gov/neo/rest/v1/feed';
 
 if (!process.env.NASA_API_KEY) {
   console.error('NASA_API_KEY environment variable not set');
@@ -50,30 +49,8 @@ app.post('/api/v1/asteroids', async (req, res) => {
 
     const { dateStart, dateEnd, within } = body;
 
-    // TODO: pagination
-    const { data } = await axios.get(BASE_NASA_NEO_API_URL, {
-      params: {
-        start_date: dateStart,
-        end_date: dateEnd,
-        api_key: process.env.NASA_API_KEY
-      }
-    });
-
-    const { near_earth_objects: nearEarthObjects } = data;
-
-    const asteroids = [];
-    for (const date in nearEarthObjects) {
-      for (const asteroid of nearEarthObjects[date]) {
-        // TODO: close_approach_data is an array... interesting...
-        if (
-          asteroid.close_approach_data[0].miss_distance[within.units] <=
-          within.value
-        ) {
-          //   console.log(asteroid.close_approach_data);
-          asteroids.push(asteroid.name);
-        }
-      }
-    }
+    const nasaClient = new NasaClient(process.env.NASA_API_KEY);
+    const asteroids = await nasaClient.getNearMissAsteroids(dateStart, dateEnd, within);
 
     res.send({ asteroids });
   } catch (err) {
