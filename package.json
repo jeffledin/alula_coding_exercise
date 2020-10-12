@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/jeffledin/alula_coding_exercise/issues"
   },
-  "homepage": "https://github.com/jeffledin/alula_coding_exercise#readme"
+  "homepage": "https://github.com/jeffledin/alula_coding_exercise#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
