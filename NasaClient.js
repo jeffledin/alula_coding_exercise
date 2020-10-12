@@ -23,12 +23,14 @@ class NasaClient {
       const asteroids = [];
       for (const date in nearEarthObjects) {
         for (const asteroid of nearEarthObjects[date]) {
-          // TODO: close_approach_data is an array... interesting...
+          // NOTE: close_approach_data is an array that appears to
+          // only have one element. It is assumed that the first
+          // element is used when reading the miss_distance for a
+          // given asteroid.
           if (
             asteroid.close_approach_data[0].miss_distance[within.units] <=
             within.value
           ) {
-            //   console.log(asteroid.close_approach_data);
             asteroids.push(asteroid.name);
           }
         }
@@ -36,10 +38,11 @@ class NasaClient {
 
       return asteroids;
     } catch (err) {
-      console.log(err);
       throw {
-        status: 500,
-        message: 'Unknown error'
+        status: err.response.data.code ? err.response.data.code : 500,
+        message: err.response.data.error_message
+          ? err.response.data.error_message
+          : 'Unknown error'
       };
     }
   }
