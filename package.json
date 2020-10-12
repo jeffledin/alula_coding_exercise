@@ -1,0 +1,20 @@
+{
+  "name": "alula_coding_exercise",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jeffledin@github.com/jeffledin/alula_coding_exercise.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jeffledin/alula_coding_exercise/issues"
+  },
+  "homepage": "https://github.com/jeffledin/alula_coding_exercise#readme"
+}
