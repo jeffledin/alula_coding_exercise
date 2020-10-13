@@ -38,6 +38,10 @@ class NasaClient {
 
       const { near_earth_objects: nearEarthObjects } = data;
 
+      // This value could either be a string or a number. Convert
+      // it to a number regardless.
+      const withinValue = parseFloat(within.value);
+
       // Iterate through all of the date ranges and filter the
       // asteroids in-memory based off the provided distance.
       const asteroids = [];
@@ -49,7 +53,7 @@ class NasaClient {
           // given asteroid.
           if (
             asteroid.close_approach_data[0].miss_distance[within.units] <=
-            within.value
+            withinValue
           ) {
             asteroids.push(asteroid.name);
           }
