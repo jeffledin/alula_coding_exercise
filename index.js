@@ -1,4 +1,5 @@
 const express = require('express');
+const { body, validationResult } = require('express-validator');
 
 const { NasaClient } = require('./NasaClient');
 
@@ -12,76 +13,55 @@ if (!process.env.NASA_API_KEY) {
   process.exit(1);
 }
 
-app.post('/api/v1/asteroids', async (req, res) => {
-  const { body } = req;
-
-  /**
-   * Validates the contents of the body. Throws if the required
-   * fields are missing.
-   *
-   * @param {Object} body - The body contents.
-   *
-   * @throws {Object}
-   */
-  const validateBodyContents = body => {
-    if (!body || !Object.keys(body).length) {
-      throw {
-        status: 400,
-        message: 'Missing required parameters'
-      };
+app.post(
+  '/api/v1/asteroids',
+  [
+    body('dateStart', 'Invalid start date').isString(),
+    body('dateEnd', 'Invalid end date').isString(),
+    body(
+      'within.value',
+      'Invalid distance value, must be positive number'
+    ).isFloat({
+      min: 0.0
+    }),
+    body('within.units', 'Invalid units, must be kilometers or miles').isIn([
+      'kilometers',
+      'miles'
+    ])
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: true,
+        message: errors.array()[0].msg
+      });
     }
 
-    if (
-      !body.dateStart ||
-      !body.dateEnd ||
-      !body.within ||
-      !body.within.value ||
-      !body.within.units
-    ) {
-      throw {
-        status: 400,
-        message: 'One or more parameters are missing'
-      };
+    const { body } = req;
+
+    try {
+      const { dateStart, dateEnd, within } = body;
+
+      const nasaClient = new NasaClient(process.env.NASA_API_KEY);
+      const asteroids = await nasaClient.getNearMissAsteroids(
+        dateStart,
+        dateEnd,
+        within
+      );
+
+      res.json({ asteroids });
+    } catch (err) {
+      res.status(err.status ? err.status : 500).json({
+        error: true,
+        message: err.message ? err.message : 'Unknown'
+      });
     }
-
-    if (body.within.units !== 'kilometers' && body.within.units !== 'miles') {
-      throw {
-        status: 400,
-        message: 'Invalid unit provided, must be either kilometers or miles'
-      };
-    }
-
-    if (typeof body.within.value !== 'number') {
-      throw {
-        status: 400,
-        message: 'Distance value must be a number'
-      };
-    }
-  };
-
-  try {
-    validateBodyContents(body);
-
-    const { dateStart, dateEnd, within } = body;
-
-    const nasaClient = new NasaClient(process.env.NASA_API_KEY);
-    const asteroids = await nasaClient.getNearMissAsteroids(
-      dateStart,
-      dateEnd,
-      within
-    );
-
-    res.send({ asteroids });
-  } catch (err) {
-    res.status(err.status ? err.status : 500).send({
-      error: true,
-      message: err.message ? err.message : 'Unknown'
-    });
   }
-});
+);
 
 app.use((req, res) => {
-  res.status(501).send({
+  res.status(501).json({
     error: true,
     message: 'Endpoint not implemented'
   });
