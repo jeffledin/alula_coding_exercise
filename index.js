@@ -12,37 +12,52 @@ if (!process.env.NASA_API_KEY) {
   process.exit(1);
 }
 
-const validateBodyContents = body => {
-  if (!body || !Object.keys(body).length) {
-    throw {
-      status: 400,
-      message: 'Missing required parameters'
-    };
-  }
-
-  if (
-    !body.dateStart ||
-    !body.dateEnd ||
-    !body.within ||
-    !body.within.value ||
-    !body.within.units
-  ) {
-    throw {
-      status: 400,
-      message: 'One or more parameters are missing'
-    };
-  }
-
-  if (body.within.units !== 'kilometers' && body.within.units !== 'miles') {
-    throw {
-      status: 400,
-      message: 'Invalid unit provided, must be either kilometers or miles'
-    };
-  }
-};
-
 app.post('/api/v1/asteroids', async (req, res) => {
   const { body } = req;
+
+  /**
+   * Validates the contents of the body. Throws if the required
+   * fields are missing.
+   *
+   * @param {Object} body - The body contents.
+   *
+   * @throws {Object}
+   */
+  const validateBodyContents = body => {
+    if (!body || !Object.keys(body).length) {
+      throw {
+        status: 400,
+        message: 'Missing required parameters'
+      };
+    }
+
+    if (
+      !body.dateStart ||
+      !body.dateEnd ||
+      !body.within ||
+      !body.within.value ||
+      !body.within.units
+    ) {
+      throw {
+        status: 400,
+        message: 'One or more parameters are missing'
+      };
+    }
+
+    if (body.within.units !== 'kilometers' && body.within.units !== 'miles') {
+      throw {
+        status: 400,
+        message: 'Invalid unit provided, must be either kilometers or miles'
+      };
+    }
+
+    if (typeof body.within.value !== 'number') {
+      throw {
+        status: 400,
+        message: 'Distance value must be a number'
+      };
+    }
+  };
 
   try {
     validateBodyContents(body);
@@ -58,7 +73,6 @@ app.post('/api/v1/asteroids', async (req, res) => {
 
     res.send({ asteroids });
   } catch (err) {
-    console.log(err);
     res.status(err.status ? err.status : 500).send({
       error: true,
       message: err.message ? err.message : 'Unknown'
@@ -69,7 +83,7 @@ app.post('/api/v1/asteroids', async (req, res) => {
 app.use((req, res) => {
   res.status(501).send({
     error: true,
-    message: 'API not implemented'
+    message: 'Endpoint not implemented'
   });
 });
 
