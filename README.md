@@ -25,8 +25,12 @@ shown below.
 
 ### POST /api/v1/asteroids
 
-Description: Retrieves a list of asteroids expected to pass near the earth during the specified date range.
+Description: Retrieves a list of asteroids expected to pass near Earth during the specified date range.
 Only asteroids less than or equal to the specified distance range are returned.
+
+Note: The NASA API states that the maximum date range is 7 days. In the future, this could be circumvented by modifying our API
+to fragment a date range into 7 day chunks and calling the NASA API for each range. The results could then
+be aggregated and returned. Alternatively, NASA could investigate implementing pagination in their API.
 
 Required body parameters:
 | Parameter | Description |
