@@ -1,4 +1,4 @@
-# Allula Coding Exercise: Problem #1
+# Alula Coding Exercise: Problem #1
 
 ## Requirements
 
