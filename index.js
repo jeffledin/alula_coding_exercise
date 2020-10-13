@@ -50,7 +50,11 @@ app.post('/api/v1/asteroids', async (req, res) => {
     const { dateStart, dateEnd, within } = body;
 
     const nasaClient = new NasaClient(process.env.NASA_API_KEY);
-    const asteroids = await nasaClient.getNearMissAsteroids(dateStart, dateEnd, within);
+    const asteroids = await nasaClient.getNearMissAsteroids(
+      dateStart,
+      dateEnd,
+      within
+    );
 
     res.send({ asteroids });
   } catch (err) {
@@ -62,7 +66,12 @@ app.post('/api/v1/asteroids', async (req, res) => {
   }
 });
 
-// TODO: handle unsupported routes
+app.use((req, res) => {
+  res.status(501).send({
+    error: true,
+    message: 'API not implemented'
+  });
+});
 
 app.listen(port, () => {
   console.log(`API listening on port ${port}`);
